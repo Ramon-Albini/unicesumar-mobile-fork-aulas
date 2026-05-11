@@ -59,50 +59,16 @@ class DetalhesFilmeRouteArgs {
 
 /// generated route for
 /// [TelaPrincipalMoviePage]
-class TelaPrincipalMovieRoute
-    extends PageRouteInfo<TelaPrincipalMovieRouteArgs> {
-  TelaPrincipalMovieRoute({
-    Key? key,
-    required List<FilmeItem> filmes,
-    List<PageRouteInfo>? children,
-  }) : super(
-         TelaPrincipalMovieRoute.name,
-         args: TelaPrincipalMovieRouteArgs(key: key, filmes: filmes),
-         initialChildren: children,
-       );
+class TelaPrincipalMovieRoute extends PageRouteInfo<void> {
+  const TelaPrincipalMovieRoute({List<PageRouteInfo>? children})
+    : super(TelaPrincipalMovieRoute.name, initialChildren: children);
 
   static const String name = 'TelaPrincipalMovieRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<TelaPrincipalMovieRouteArgs>();
-      return TelaPrincipalMoviePage(key: args.key, filmes: args.filmes);
+      return const TelaPrincipalMoviePage();
     },
   );
-}
-
-class TelaPrincipalMovieRouteArgs {
-  const TelaPrincipalMovieRouteArgs({this.key, required this.filmes});
-
-  final Key? key;
-
-  final List<FilmeItem> filmes;
-
-  @override
-  String toString() {
-    return 'TelaPrincipalMovieRouteArgs{key: $key, filmes: $filmes}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! TelaPrincipalMovieRouteArgs) return false;
-    return key == other.key &&
-        const ListEquality<FilmeItem>().equals(filmes, other.filmes);
-  }
-
-  @override
-  int get hashCode =>
-      key.hashCode ^ const ListEquality<FilmeItem>().hash(filmes); 
 }

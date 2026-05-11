@@ -1,16 +1,79 @@
+import 'dart:convert';
+
+
 import 'package:auto_route/auto_route.dart';
-import 'package:example_application/models/filme_item.dart';
-import 'package:example_application/pages/detalhes_filme_page.dart';
-import 'package:example_application/temas.dart';
-import 'package:example_application/widgets/filmes_listview.dart';
-import 'package:example_application/widgets/temas_gridview.dart';
+import 'package:example_application/router/app_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../models/filme_item.dart';
+import '../models/tema_item.dart';
+import '../widgets/filmes_listview.dart';
+import '../widgets/temas_gridview.dart';
+
+const List<TemaItem> temas = <TemaItem>[
+  TemaItem(
+    nome: 'Ação',
+    imageUrl: 'https://picsum.photos/seed/acao/500/350',
+    cor: Color(0xFF264653),
+  ),
+  TemaItem(
+    nome: 'Comédia',
+    imageUrl: 'https://picsum.photos/seed/comedia/500/350',
+    cor: Color(0xFF2A9D8F),
+  ),
+  TemaItem(
+    nome: 'Drama',
+    imageUrl: 'https://picsum.photos/seed/drama/500/350',
+    cor: Color(0xFFE76F51),
+  ),
+  TemaItem(
+    nome: 'Ficção Científica',
+    imageUrl: 'https://picsum.photos/seed/ficcao/500/350',
+    cor: Color(0xFF1D3557),
+  ),
+  TemaItem(
+    nome: 'Suspense',
+    imageUrl: 'https://picsum.photos/seed/suspense/500/350',
+    cor: Color(0xFF6A4C93),
+  ),
+  TemaItem(
+    nome: 'Animação',
+    imageUrl: 'https://picsum.photos/seed/animacao/500/350',
+    cor: Color(0xFFF4A261),
+  ),
+];
+
+Future<List<FilmeItem>> carregarFilmes() async {
+  final String jsonString = await rootBundle.loadString(
+    'assets/data/filmes.json',
+  );
+
+  final List<dynamic> dados = jsonDecode(jsonString) as List<dynamic>;
+
+  return dados
+      .cast<Map<String, dynamic>>()
+      .map(FilmeItem.fromJson)
+      .toList(growable: false);
+}
 
 @RoutePage()
-class TelaPrincipalMoviePage extends StatelessWidget {
-  const TelaPrincipalMoviePage({super.key, required this.filmes});
+class TelaPrincipalMoviePage extends StatefulWidget {
+  const TelaPrincipalMoviePage({super.key});
 
-  final List<FilmeItem> filmes;
+  @override
+  State<TelaPrincipalMoviePage> createState() => _TelaPrincipalMoviePageState();
+}
+
+class _TelaPrincipalMoviePageState extends State<TelaPrincipalMoviePage> {
+  late Future<List<FilmeItem>> _filmesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _filmesFuture = carregarFilmes();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +103,24 @@ class TelaPrincipalMoviePage extends StatelessWidget {
             ),
             Expanded(
               flex: 4,
-              child: FilmesListView(
-                filmes: filmes,
-                onTap: (filme) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetalhesFilmePage(filme: filme),
-                    ),
+              child: FutureBuilder<List<FilmeItem>>(
+                future: _filmesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Erro ao carregar filmes'));
+                  }
+
+                  final List<FilmeItem> filmes = snapshot.data ?? [];
+
+                  return FilmesListView(
+                    filmes: filmes,
+                    onTap: (filme) {
+                      context.router.push(DetalhesFilmeRoute(filme: filme));
+                    },
                   );
                 },
               ),
